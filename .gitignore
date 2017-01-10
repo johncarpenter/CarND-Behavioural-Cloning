@@ -1,0 +1,6 @@
+_pycache_
+IMG
+*.h5
+*.json
+*.csv
+.DS_Store
