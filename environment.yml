@@ -7,7 +7,6 @@ dependencies:
 - conda-forge::eventlet=0.19.0=py35_0
 - conda-forge::flask-socketio=2.7.1=py35_0
 - conda-forge::keras=1.0.7=py35_0
-- conda-forge::libgfortran=3.0.0=0
 - conda-forge::protobuf=3.0.0b2=py35_0
 - conda-forge::python-engineio=1.0.0=py35_0
 - conda-forge::python-socketio=1.5.1=py35_0
@@ -55,4 +54,3 @@ dependencies:
 - yaml=0.1.6=0
 - zlib=1.2.8=3
 prefix: /Users/john/anaconda/envs/BehavioralCloning
-
