@@ -1,9 +1,12 @@
 import random
 import pandas as pd
 import numpy as np
+import os
 
 
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
+
+PATH = "./data/IMG/"
 
 datagen = ImageDataGenerator( rotation_range=5,
         width_shift_range=0.05,
@@ -24,7 +27,10 @@ def steering_angle_generator(filenames, values):
 def load_images(paths, target_size):
     images = np.zeros((len(paths), *target_size, 3))
     for i, p in enumerate(paths):
-        img = load_img(p, target_size=target_size)
+
+        file = PATH + os.path.basename(p)
+
+        img = load_img(file, target_size=target_size)
         img = img_to_array(img,dim_ordering='tf')
         images[i] = img
 
