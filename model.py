@@ -10,24 +10,51 @@ import json
 from sklearn.model_selection import train_test_split
 
 from keras.preprocessing import image
-from keras.models import Sequential, model_from_json
-from keras.layers import Conv2D, MaxPooling2D
-from keras.layers import Activation, Dropout, Flatten, Dense
-from keras.layers import Input, Flatten, Dense, Lambda, merge
+from keras.models import Model,Sequential, model_from_json
+from keras.layers import Conv2D, MaxPooling2D,AveragePooling2D
+from keras.layers import Activation, Flatten, Dense
+from keras.applications import VGG16
+from keras.layers import Input, Lambda
 from keras.layers import Dropout, BatchNormalization, ELU
 from keras.optimizers import Adam
+from keras.regularizers import l2
 
 from keras.callbacks import EarlyStopping, ModelCheckpoint
 
 import utils
 
+
+def prepare_model_vgg16():
+    """Pretrained VGG16 model with fine-tunable last two layers
+    """
+    input_image = Input(shape = (224,224,3))
+
+    base_model = VGG16(input_tensor=input_image,include_top=False)
+
+    for layer in base_model.layers[:-3]:
+        layer.trainable = False
+
+    W_regularizer = l2(0.01)
+
+    x = base_model.get_layer("block5_conv3").output
+    x = AveragePooling2D((2, 2))(x)
+    x = Dropout(0.5)(x)
+    x = BatchNormalization()(x)
+    x = Dropout(0.5)(x)
+    x = Flatten()(x)
+    x = Dense(100, activation="elu", W_regularizer=l2(0.01))(x)
+    x = Dense(1, activation="linear")(x)
+
+
+    model = Model( input=input_image, output=x)
+    return model
 """
 Model based on Nvidia paper https://arxiv.org/pdf/1604.07316v1.pdf
 """
 def prepare_model_nvidia():
 
     model = Sequential()
-    model.add(Lambda(lambda x: x/127.5 - 1.,input_shape=( 80, 80, 3)))
+    model.add(Lambda(lambda x: x/127.5 - 1.,input_shape=( 40, 40, 3)))
     model.add(Conv2D(24, 5, 5, subsample=(2, 2), border_mode="same"))
     model.add(ELU())
     model.add(Conv2D(36, 5, 5, subsample=(2, 2), border_mode="same"))
@@ -57,7 +84,7 @@ def prepare_model_nvidia():
 
 def prepare_model():
     model = Sequential()
-    model.add(Lambda(lambda x: x/127.5 - 1.,input_shape=( 80, 80, 3)))
+    model.add(Lambda(lambda x: x/127.5 - 1.,input_shape=( 40, 40, 3)))
     model.add(Conv2D(16, 8, 8, subsample=(4, 4), border_mode="same"))
     model.add(ELU())
     model.add(Conv2D(32, 5, 5, subsample=(2, 2), border_mode="same"))
@@ -82,7 +109,7 @@ def train(model, train_generator,validation_generator):
 
     return model.fit_generator(
         train_generator,
-        samples_per_epoch=train_generator.N*4,
+        samples_per_epoch=train_generator.N,
         nb_epoch=5,
         verbose=1,
         validation_data=validation_generator,
@@ -111,15 +138,18 @@ if __name__ == '__main__':
 
     # If the model and weights do not exist, create a new model
     except Exception as error:
-        print ("Unexpected error:", error)
         print("Contructing new model")
-        model = prepare_model_nvidia()
+        model = prepare_model_vgg16()
 
     model.summary()
+
+    save(model,'model')
 
     model.compile(loss='mse',
         optimizer=Adam(lr=0.001),
         metrics=['accuracy'])
+
+
 
     data = utils.read_drive_log()
     n_samples = data.shape[0]
@@ -137,5 +167,3 @@ if __name__ == '__main__':
     val_generator = utils.steering_angle_generator(X_validation,y_validation)
 
     history = train(model, train_generator , val_generator)
-
-    save(model,'model')
