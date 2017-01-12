@@ -18,7 +18,6 @@ def read_drive_log():
     drive_input = pd.read_csv('data/driving_log.csv', header=None,names=['center','left','right','steering_angle','throttle','brake','speed'])
     return drive_input
 
-
 def steering_angle_generator(filenames, values):
     return datagen_blank.flow(load_images(filenames,target_size=(224, 224)),values)
 

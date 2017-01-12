@@ -149,8 +149,6 @@ if __name__ == '__main__':
         optimizer=Adam(lr=0.001),
         metrics=['accuracy'])
 
-
-
     data = utils.read_drive_log()
     n_samples = data.shape[0]
     print("Read {} Records.".format(n_samples))
