@@ -54,7 +54,7 @@ Model based on Nvidia paper https://arxiv.org/pdf/1604.07316v1.pdf
 def prepare_model_nvidia():
 
     model = Sequential()
-    model.add(Lambda(lambda x: x/127.5 - 1.,input_shape=( 40, 40, 3)))
+    model.add(Lambda(lambda x: x/127.5 - 1.,input_shape=( 80, 80, 3)))
     model.add(Conv2D(24, 5, 5, subsample=(2, 2), border_mode="same"))
     model.add(ELU())
     model.add(Conv2D(36, 5, 5, subsample=(2, 2), border_mode="same"))
@@ -84,7 +84,7 @@ def prepare_model_nvidia():
 
 def prepare_model():
     model = Sequential()
-    model.add(Lambda(lambda x: x/127.5 - 1.,input_shape=( 40, 40, 3)))
+    model.add(Lambda(lambda x: x/127.5 - 1.,input_shape=( 80, 80, 3)))
     model.add(Conv2D(16, 8, 8, subsample=(4, 4), border_mode="same"))
     model.add(ELU())
     model.add(Conv2D(32, 5, 5, subsample=(2, 2), border_mode="same"))
@@ -139,7 +139,7 @@ if __name__ == '__main__':
     # If the model and weights do not exist, create a new model
     except Exception as error:
         print("Contructing new model")
-        model = prepare_model_vgg16()
+        model = prepare_model_nvidia()
 
     model.summary()
 

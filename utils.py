@@ -22,7 +22,7 @@ def read_drive_log():
     return drive_input
 
 def steering_angle_generator(filenames, values):
-    return datagen_blank.flow(load_images(filenames,target_size=(224, 224)),values)
+    return datagen_blank.flow(load_images(filenames,target_size=(80, 80)),values)
 
 def load_images(paths, target_size):
     images = np.zeros((len(paths), *target_size, 3))
