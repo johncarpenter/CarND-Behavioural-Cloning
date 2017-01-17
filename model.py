@@ -29,7 +29,7 @@ from sklearn.utils import shuffle
 import utils
 
 
-def prepare_model_vgg16():
+def prepare_model_vgg16(input_shape=(224,224,3)):
     """Pretrained VGG16 model with fine-tunable last two layers
     """
     input_image = Input(shape = (224,224,3))
@@ -200,8 +200,8 @@ if __name__ == '__main__':
         for index, angle in enumerate(steer):
             tmp_images.append(center_imgs[index])
             tmp_angles.append(angle)
-            #images.append(left_imgs[index])
-            #angles.append(angle+0.2)
+            #tmp_images.append(left_imgs[index])
+            #tmp_angles.append(angle-0.2)
             #images.append(left_imgs[index])
             #angles.append(angle-0.2)
             #if (index > 500):
@@ -212,9 +212,9 @@ if __name__ == '__main__':
         #plt.imshow(utils.load_img_from_file(file,target_size=(80,80)))
         #plt.show()
 
-        tmp_pangles = utils.smooth_data(tmp_angles,window=5)
+        #tmp_pangles = utils.smooth_data(tmp_angles,window=5)
         images += tmp_images
-        angles += tmp_pangles
+        angles += tmp_angles
 
     images = np.asarray(images)
     angles = np.asarray(angles,dtype=np.float64)
