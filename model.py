@@ -61,30 +61,30 @@ def prepare_model_nvidia(input_shape=(80,80,3)):
 
     model = Sequential()
     model.add(Lambda(lambda x: x/127.5 - 1.,input_shape=input_shape))
-    model.add(Conv2D(24, 5, 5, subsample=(2, 2), border_mode="same"))
+    model.add(Conv2D(24, 5, 5, subsample=(2, 2), border_mode="valid"))
     model.add(ELU())
-    model.add(Conv2D(36, 5, 5, subsample=(2, 2), border_mode="same"))
+    model.add(Conv2D(36, 5, 5, subsample=(2, 2), border_mode="valid"))
     model.add(ELU())
-    model.add(Conv2D(48, 5, 5, subsample=(2, 2), border_mode="same"))
+    model.add(Conv2D(48, 5, 5, subsample=(2, 2), border_mode="valid"))
     model.add(ELU())
-    model.add(Conv2D(64, 3, 3, subsample=(1, 1), border_mode="same"))
+    model.add(Conv2D(64, 3, 3, subsample=(1, 1), border_mode="valid"))
     model.add(ELU())
-    model.add(Conv2D(64, 3, 3, subsample=(1, 1), border_mode="same"))
+    model.add(Conv2D(64, 3, 3, subsample=(1, 1), border_mode="valid"))
     model.add(ELU())
     model.add(Flatten())
-    model.add(Dense(1164))
-    #model.add(Dropout(.8))
+    model.add(Dense(1152))
+    model.add(Dropout(.2))
     model.add(ELU())
     model.add(Dense(100))
-    #model.add(Dropout(.8))
+    model.add(Dropout(.2))
     model.add(ELU())
     model.add(Dense(50))
-    #model.add(Dropout(.8))
+    model.add(Dropout(.2))
     model.add(ELU())
     model.add(Dense(10))
-    #model.add(Dropout(.8))
+    model.add(Dropout(.2))
     model.add(ELU())
-    model.add(Dense(1,activation='linear'))
+    model.add(Dense(1,activation='tanh'))
 
     return model
 
@@ -115,8 +115,8 @@ def train(model, train_generator,validation_generator):
 
     return model.fit_generator(
         train_generator,
-        samples_per_epoch=train_generator.N*2,
-        nb_epoch=5, # it will auto stop
+        samples_per_epoch=train_generator.N,
+        nb_epoch=10, # it will auto stop
         verbose=1,
         validation_data=validation_generator,
         nb_val_samples=validation_generator.N,
@@ -165,7 +165,7 @@ if __name__ == '__main__':
     # If the model and weights do not exist, create a new model
     except Exception as error:
         print("Contructing new model")
-        model = prepare_model(input_shape=(80,80,3))
+        model = prepare_model_nvidia(input_shape=(80,80,3))
 
     model.summary()
 
@@ -175,40 +175,56 @@ if __name__ == '__main__':
         optimizer=Adam(lr=0.001),
         metrics=['accuracy'])
 
-    log_path = "./data/Track2/driving_log.csv"
-    img_path = "./data/Track2/IMG/"
+    log_paths = ["./data/Track1/driving_log.csv","./data/Track2/driving_log.csv","./data/Track3/driving_log.csv"]
+    img_path = "./data/IMG/"
     image_resize = (80,80)
-
-    data = utils.read_drive_log(path=log_path)
-    n_samples = data.shape[0]
-    print("Read {} Records.".format(n_samples))
-
-    center_imgs = np.asarray(data['center'])
-    left_imgs = np.asarray(data['left'])
-    right_imgs = np.asarray(data['right'])
-
-    steer = np.asarray(data['steering_angle'])
 
     images = []
     angles = []
 
-    for index, angle in enumerate(steer):
-        images.append(center_imgs[index])
-        angles.append(angle)
-        #images.append(left_imgs[index])
-        #angles.append(angle+0.2)
-        #images.append(left_imgs[index])
-        #angles.append(angle-0.2)
+
+    for log_path in log_paths:
+        data = utils.read_drive_log(path=log_path)
+        n_samples = data.shape[0]
+        print("Read {} Records.".format(n_samples))
+
+        center_imgs = np.asarray(data['center'])
+        left_imgs = np.asarray(data['left'])
+        right_imgs = np.asarray(data['right'])
+
+        steer = np.asarray(data['steering_angle'])
+
+        tmp_images = []
+        tmp_angles = []
+
+        for index, angle in enumerate(steer):
+            tmp_images.append(center_imgs[index])
+            tmp_angles.append(angle)
+            #images.append(left_imgs[index])
+            #angles.append(angle+0.2)
+            #images.append(left_imgs[index])
+            #angles.append(angle-0.2)
+            #if (index > 500):
+            #    break
 
 
-    pangles = utils.smooth_data(angles,window=5)
+        #file = img_path + os.path.basename(images[0])
+        #plt.imshow(utils.load_img_from_file(file,target_size=(80,80)))
+        #plt.show()
+
+        tmp_pangles = utils.smooth_data(tmp_angles,window=5)
+        images += tmp_images
+        angles += tmp_pangles
 
     images = np.asarray(images)
     angles = np.asarray(angles,dtype=np.float64)
 
-    images,  pangles = shuffle(images, pangles, random_state=0)
+    print("Processing {} Records.".format(angles.shape[0]))
 
-    X_train,test_images,y_train,test_angles = train_test_split(images,pangles,test_size=0.15)
+
+    images,  angles = shuffle(images, angles, random_state=0)
+
+    X_train,test_images,y_train,test_angles = train_test_split(images,angles,test_size=0.15)
 
     X_validation,X_test,y_validation,y_test = train_test_split(test_images,test_angles,test_size=0.25)
 

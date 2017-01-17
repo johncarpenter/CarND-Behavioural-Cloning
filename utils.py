@@ -3,16 +3,14 @@ import pandas as pd
 import numpy as np
 import os
 
+import matplotlib.pyplot as plt
+
+from generator import DriveImageDataGenerator
 
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
-datagen = ImageDataGenerator( rotation_range=5,
-        width_shift_range=0.05,
-        height_shift_range=0.05,
-        zoom_range=0.2,
-        fill_mode='nearest')
 
-datagen_blank = ImageDataGenerator()
+datagen = ImageDataGenerator()
 
 def read_drive_log(path="./data/driving_log.csv"):
     print("Reading file {}".format(path))
@@ -24,11 +22,12 @@ def smooth_data(angles, window=10):
     pangles = pd.DataFrame(angles)
     pangles = pangles.rolling(window=window).mean()
     pangles = pangles.fillna(0)
-    return np.asarray(pangles[0],dtype=np.float64)
+    return list(pangles[0])
 
 
 def steering_angle_generator(filenames, values, target_size=(80,80),path="./data/IMG/"):
-    return datagen_blank.flow(load_images(filenames,target_size=target_size,root=path),values)
+    return datagen.flow(load_images(filenames,target_size=target_size,root=path),values)
+
 
 def load_images(paths, target_size,root="./data/IMG/"):
     images = np.zeros((len(paths), *target_size, 3))
@@ -36,15 +35,25 @@ def load_images(paths, target_size,root="./data/IMG/"):
 
         file = root + os.path.basename(p)
 
-        img = load_img(file, target_size=target_size)
-        img = img_to_array(img,dim_ordering='tf')
-        images[i] = img
+        images[i] = load_img_from_file(file,target_size=target_size)
 
     return images
 
+def load_img_from_file(filename, target_size=(80,80)):
+    img = load_img(filename)
+    img = preprocess(img)
+    img = img_to_array(img,dim_ordering='tf')
+    return img
 
-def load_img_from_file(filename, target_size=(40,40)):
-    img = load_img(filename,target_size=target_size)
-    x = img_to_array(img,dim_ordering='tf')
-    x = x.reshape((1,) + x.shape)
-    return x
+def preprocess(img, target_size=(80,80)):
+    img = crop_image(img)
+    img = img.resize(target_size)
+    return img
+
+
+
+
+
+def crop_image(img):
+    w,h = img.size
+    return img.crop((0,60,w,h))
