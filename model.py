@@ -116,11 +116,11 @@ def train(model, train_generator,validation_generator):
 
     return model.fit_generator(
         train_generator,
-        samples_per_epoch=train_generator.n*2,
+        samples_per_epoch=train_generator.N,
         nb_epoch=10, # it will auto stop
         verbose=1,
         validation_data=validation_generator,
-        nb_val_samples=validation_generator.n,
+        nb_val_samples=validation_generator.N,
         callbacks=[checkpoint,early_stopping])
 
 def evaluate(model, test_generator):

@@ -8,9 +8,9 @@ import matplotlib.pyplot as plt
 
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
-from generator import DriveImageDataGenerator
+from generator import RegressionImageDataGenerator
 
-datagen = DriveImageDataGenerator(horizontal_flip=True,
+datagen = RegressionImageDataGenerator(horizontal_flip=True,
     horizontal_flip_value_transform=lambda val: -val,)
 
 def read_drive_log(path="./data/driving_log.csv"):
