@@ -382,6 +382,7 @@ class DriveImageDataGenerator(object):
         self.fill_mode = fill_mode
         self.cval = cval
         self.horizontal_flip = horizontal_flip
+        self.horizontal_flip_value_transform = horizontal_flip_value_transform
         self.vertical_flip = vertical_flip
         self.rescale = rescale
         self.preprocessing_function = preprocessing_function
