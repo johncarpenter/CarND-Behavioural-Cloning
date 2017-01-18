@@ -46,7 +46,6 @@ def load_img_from_file(filename, target_size=(80,80)):
     img = load_img(filename)
     img = preprocess(img,target_size)
     img = img_to_array(img,dim_ordering='tf')
-    img = img[:,:,::-1]
     return img
 
 def preprocess(img, target_size=(80,80)):

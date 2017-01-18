@@ -181,9 +181,9 @@ if __name__ == '__main__':
         optimizer=Adam(lr=0.00001),
         metrics=['accuracy'])
 
-    log_paths = ["./data/driving_log.csv","./data/track1_driving_log.csv","./data/track1_recovery_log.csv"]
-    #log_paths = ["./data/driving_log.csv"]
-    img_path = "./data/IMG/"
+    #log_paths = ["./data/driving_log.csv","./data/track1_driving_log.csv","./data/track1_recovery_log.csv"]
+    log_paths = ["./data/track2/driving_log.csv"]
+    img_path = "./data/track2/IMG/"
     image_resize = (80,80)
 
     images = []
