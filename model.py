@@ -122,7 +122,7 @@ def train(model, train_generator,validation_generator):
     return model.fit_generator(
         train_generator,
         samples_per_epoch=train_generator.N*2,
-        nb_epoch=20, # it will auto stop
+        nb_epoch=10, # it will auto stop
         verbose=1,
         validation_data=validation_generator,
         nb_val_samples=validation_generator.N,
@@ -181,7 +181,7 @@ if __name__ == '__main__':
         optimizer=Adam(lr=0.00001),
         metrics=['accuracy'])
 
-    log_paths = ["./data/track1_driving_log.csv","./data/track1_recovery_log.csv"]
+    log_paths = ["./data/driving_log.csv","./data/track1_driving_log.csv","./data/track1_recovery_log.csv"]
     #log_paths = ["./data/driving_log.csv"]
     img_path = "./data/IMG/"
     image_resize = (80,80)
