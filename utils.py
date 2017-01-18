@@ -8,8 +8,10 @@ import matplotlib.pyplot as plt
 
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
 
+from generator import DriveImageDataGenerator
 
-datagen = ImageDataGenerator()
+datagen = DriveImageDataGenerator(horizontal_flip=True,
+    horizontal_flip_value_transform=lambda val: -val,)
 
 def read_drive_log(path="./data/driving_log.csv"):
     print("Reading file {}".format(path))
@@ -40,18 +42,16 @@ def load_images(paths, target_size,root="./data/IMG/"):
 
 def load_img_from_file(filename, target_size=(80,80)):
     img = load_img(filename)
-    img = preprocess(img)
+    img = preprocess(img,target_size)
     img = img_to_array(img,dim_ordering='tf')
+    img = img[:,:,::-1]
     return img
 
 def preprocess(img, target_size=(80,80)):
+
     img = crop_image(img)
     img = img.resize(target_size)
     return img
-
-
-
-
 
 def crop_image(img):
     w,h = img.size

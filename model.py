@@ -61,16 +61,17 @@ def prepare_model_nvidia(input_shape=(80,80,3)):
 
     model = Sequential()
     model.add(Lambda(lambda x: x/127.5 - 1.,input_shape=input_shape))
+#    model.add(Lambda(lambda x: x,input_shape=input_shape))
     model.add(Conv2D(24, 5, 5, subsample=(2, 2), border_mode="valid"))
     model.add(ELU())
     model.add(Conv2D(36, 5, 5, subsample=(2, 2), border_mode="valid"))
     model.add(ELU())
-    model.add(Conv2D(48, 5, 5, subsample=(2, 2), border_mode="valid"))
-    model.add(ELU())
+    #model.add(Conv2D(48, 5, 5, subsample=(2, 2), border_mode="valid"))
+    #model.add(ELU())
     model.add(Conv2D(64, 3, 3, subsample=(1, 1), border_mode="valid"))
     model.add(ELU())
-    model.add(Conv2D(64, 3, 3, subsample=(1, 1), border_mode="valid"))
-    model.add(ELU())
+    #model.add(Conv2D(64, 3, 3, subsample=(1, 1), border_mode="valid"))
+    #model.add(ELU())
     model.add(Flatten())
     model.add(Dense(1152))
     model.add(Dropout(.2))
@@ -115,11 +116,11 @@ def train(model, train_generator,validation_generator):
 
     return model.fit_generator(
         train_generator,
-        samples_per_epoch=train_generator.N,
+        samples_per_epoch=train_generator.n,
         nb_epoch=10, # it will auto stop
         verbose=1,
         validation_data=validation_generator,
-        nb_val_samples=validation_generator.N,
+        nb_val_samples=validation_generator.n,
         callbacks=[checkpoint,early_stopping])
 
 def evaluate(model, test_generator):
@@ -172,10 +173,11 @@ if __name__ == '__main__':
     save(model,'model')
 
     model.compile(loss='mse',
-        optimizer=Adam(lr=0.001),
+        optimizer=Adam(lr=0.00001),
         metrics=['accuracy'])
 
-    log_paths = ["./data/Track1/driving_log.csv","./data/Track2/driving_log.csv","./data/Track3/driving_log.csv"]
+    log_paths = ["./data/driving_log.csv"]
+    #log_paths = ["./data/driving_log.csv"]
     img_path = "./data/IMG/"
     image_resize = (80,80)
 
@@ -212,7 +214,7 @@ if __name__ == '__main__':
         #plt.imshow(utils.load_img_from_file(file,target_size=(80,80)))
         #plt.show()
 
-        #tmp_pangles = utils.smooth_data(tmp_angles,window=5)
+        tmp_pangles = utils.smooth_data(tmp_angles,window=5)
         images += tmp_images
         angles += tmp_angles
 
