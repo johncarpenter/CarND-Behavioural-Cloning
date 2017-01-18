@@ -116,7 +116,7 @@ def train(model, train_generator,validation_generator):
 
     return model.fit_generator(
         train_generator,
-        samples_per_epoch=train_generator.n,
+        samples_per_epoch=train_generator.n*2,
         nb_epoch=10, # it will auto stop
         verbose=1,
         validation_data=validation_generator,
