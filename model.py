@@ -92,18 +92,23 @@ def prepare_model_nvidia(input_shape=(80,80,3)):
 def prepare_model(input_shape=(80,80,3)):
     model = Sequential()
     model.add(Lambda(lambda x: x/127.5 - 1.,input_shape=input_shape))
-    model.add(Conv2D(16, 8, 8, subsample=(4, 4), border_mode="same"))
+    model.add(Conv2D(16, 3, 3, subsample=(2, 2), border_mode="same"))
     model.add(ELU())
-    model.add(Conv2D(32, 5, 5, subsample=(2, 2), border_mode="same"))
+    model.add(Conv2D(24, 3, 3, subsample=(2, 2), border_mode="same"))
     model.add(ELU())
-    model.add(Conv2D(64, 5, 5, subsample=(2, 2), border_mode="same"))
+    model.add(Conv2D(36, 2, 2, subsample=(2, 2), border_mode="same"))
+    model.add(ELU())
+    model.add(Conv2D(48, 2, 2, subsample=(2, 2), border_mode="same"))
     model.add(Flatten())
     model.add(Dropout(.2))
     model.add(ELU())
-    model.add(Dense(1024))
+    model.add(Dense(512))
     model.add(Dropout(.5))
     model.add(ELU())
-    model.add(Dense(1))
+    model.add(Dense(10))
+    model.add(Dropout(.5))
+    model.add(ELU())
+    model.add(Dense(1, activation="tanh"))
     return model
 
 
@@ -166,7 +171,7 @@ if __name__ == '__main__':
     # If the model and weights do not exist, create a new model
     except Exception as error:
         print("Contructing new model")
-        model = prepare_model_nvidia(input_shape=(80,80,3))
+        model = prepare_model(input_shape=(80,80,3))
 
     model.summary()
 
