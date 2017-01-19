@@ -74,16 +74,16 @@ def prepare_model_nvidia(input_shape=(80,80,3)):
     model.add(ELU())
     model.add(Flatten())
     model.add(Dense(1152))
-    model.add(Dropout(.5))
+    model.add(Dropout(.2))
     model.add(ELU())
     model.add(Dense(100))
-    model.add(Dropout(.5))
+    model.add(Dropout(.2))
     model.add(ELU())
     model.add(Dense(50))
-    model.add(Dropout(.5))
+    model.add(Dropout(.2))
     model.add(ELU())
     model.add(Dense(10))
-    model.add(Dropout(.5))
+    model.add(Dropout(.2))
     model.add(ELU())
     model.add(Dense(1,activation='tanh'))
 
@@ -121,7 +121,7 @@ def train(model, train_generator,validation_generator):
 
     return model.fit_generator(
         train_generator,
-        samples_per_epoch=train_generator.N*2,
+        samples_per_epoch=train_generator.N,
         nb_epoch=10, # it will auto stop
         verbose=1,
         validation_data=validation_generator,
@@ -171,7 +171,7 @@ if __name__ == '__main__':
     # If the model and weights do not exist, create a new model
     except Exception as error:
         print("Contructing new model")
-        model = prepare_model(input_shape=(80,80,3))
+        model = prepare_model_nvidia(input_shape=(80,80,3))
 
     model.summary()
 
@@ -181,9 +181,9 @@ if __name__ == '__main__':
         optimizer=Adam(lr=0.00001),
         metrics=['accuracy'])
 
-    #log_paths = ["./data/driving_log.csv","./data/track1_driving_log.csv","./data/track1_recovery_log.csv"]
-    log_paths = ["./data/track2/driving_log.csv"]
-    img_path = "./data/track2/IMG/"
+    log_paths = ["./data/track1_recovery_2_log.csv","./data/track1_driving_log.csv"]
+    #log_paths = ["./data/track2/driving_log.csv"]
+    img_path = "./data/IMG/"
     image_resize = (80,80)
 
     images = []

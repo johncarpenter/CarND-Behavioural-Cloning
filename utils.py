@@ -29,7 +29,7 @@ def smooth_data(angles, window=10):
 
 
 def steering_angle_generator(filenames, values, target_size=(80,80),path="./data/IMG/"):
-    return datagen.flow(load_images(filenames,target_size=target_size,root=path),values)
+    return datagen_blank.flow(load_images(filenames,target_size=target_size,root=path),values)
 
 
 def load_images(paths, target_size,root="./data/IMG/"):
