@@ -28,17 +28,16 @@ def smooth_data(angles, window=10):
     return list(pangles[0])
 
 
-def steering_angle_generator(filenames, values, target_size=(80,80),path="./data/IMG/"):
-    return datagen_blank.flow(load_images(filenames,target_size=target_size,root=path),values)
+def steering_angle_generator(filenames, values, target_size=(80,80)):
+    return datagen.flow(load_images(filenames,target_size=target_size),values)
 
 
-def load_images(paths, target_size,root="./data/IMG/"):
+def load_images(paths, target_size):
     images = np.zeros((len(paths), *target_size, 3))
     for i, p in enumerate(paths):
 
-        file = root + os.path.basename(p)
 
-        images[i] = load_img_from_file(file,target_size=target_size)
+        images[i] = load_img_from_file(p,target_size=target_size)
 
     return images
 
@@ -56,4 +55,4 @@ def preprocess(img, target_size=(80,80)):
 
 def crop_image(img):
     w,h = img.size
-    return img.crop((0,60,w,h))
+    return img.crop((0,54,w,h))

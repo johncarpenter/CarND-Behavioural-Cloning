@@ -61,7 +61,6 @@ def prepare_model_nvidia(input_shape=(80,80,3)):
 
     model = Sequential()
     model.add(Lambda(lambda x: x/127.5 - 1.,input_shape=input_shape))
-#    model.add(Lambda(lambda x: x,input_shape=input_shape))
     model.add(Conv2D(24, 5, 5, subsample=(2, 2), border_mode="valid"))
     model.add(ELU())
     model.add(Conv2D(36, 5, 5, subsample=(2, 2), border_mode="valid"))
@@ -121,7 +120,7 @@ def train(model, train_generator,validation_generator):
 
     return model.fit_generator(
         train_generator,
-        samples_per_epoch=train_generator.N,
+        samples_per_epoch=train_generator.N*2,
         nb_epoch=10, # it will auto stop
         verbose=1,
         validation_data=validation_generator,
@@ -158,6 +157,7 @@ def render_results(history):
     plt.show()
 
 
+
 if __name__ == '__main__':
     # import model and wieghts if exists
     try:
@@ -178,19 +178,28 @@ if __name__ == '__main__':
     save(model,'model')
 
     model.compile(loss='mse',
-        optimizer=Adam(lr=0.00001),
+        optimizer=Adam(lr=0.0001),
         metrics=['accuracy'])
 
-    log_paths = ["./data/track1_recovery_2_log.csv","./data/track1_driving_log.csv"]
+    log_paths = [("./data/track1_driving_log.csv","./data/IMG/")
+        ,("./data/track3/driving_log.csv","./data/track3/IMG/")
+        ,("./data/track1_driving_2_log.csv","./data/IMG/")
+        ,("./data/track1_recovery_log.csv","./data/IMG/")
+        ,("./data/track1_recovery_2_log.csv","./data/IMG/")]
     #log_paths = ["./data/track2/driving_log.csv"]
-    img_path = "./data/IMG/"
+    #img_path = "./data/IMG/"
     image_resize = (80,80)
 
     images = []
     angles = []
 
 
-    for log_path in log_paths:
+    for path in log_paths:
+
+        log_path = path[0]
+        img_path = path[1]
+
+
         data = utils.read_drive_log(path=log_path)
         n_samples = data.shape[0]
         print("Read {} Records.".format(n_samples))
@@ -205,7 +214,7 @@ if __name__ == '__main__':
         tmp_angles = []
 
         for index, angle in enumerate(steer):
-            tmp_images.append(center_imgs[index])
+            tmp_images.append(img_path + os.path.basename(center_imgs[index]))
             tmp_angles.append(angle)
             #tmp_images.append(left_imgs[index])
             #tmp_angles.append(angle-0.2)
@@ -244,9 +253,9 @@ if __name__ == '__main__':
     print("Number of Test Images:",X_test.shape[0])
     print("Number of Test Steering Angles:",y_test.shape[0])
 
-    train_generator = utils.steering_angle_generator(X_train,y_train,target_size=image_resize,path=img_path)
-    val_generator = utils.steering_angle_generator(X_validation,y_validation,target_size=image_resize,path=img_path)
-    test_generator = utils.steering_angle_generator(X_test,y_test,target_size=image_resize,path=img_path)
+    train_generator = utils.steering_angle_generator(X_train,y_train,target_size=image_resize)
+    val_generator = utils.steering_angle_generator(X_validation,y_validation,target_size=image_resize)
+    test_generator = utils.steering_angle_generator(X_test,y_test,target_size=image_resize)
 
     history = train(model, train_generator , val_generator)
     #render_results(history)
