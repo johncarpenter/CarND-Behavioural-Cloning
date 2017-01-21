@@ -10,8 +10,12 @@ from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_a
 
 from generator import RegressionImageDataGenerator
 
-datagen = RegressionImageDataGenerator(horizontal_flip=True,
-    horizontal_flip_value_transform=lambda val: -val,)
+datagen = RegressionImageDataGenerator(
+    channel_shift_range=0.2,
+    width_shift_range=0.2,
+    width_shift_value_transform=lambda val, shift: val - shift,
+    horizontal_flip=True,
+    horizontal_flip_value_transform=lambda val: -val)
 
 datagen_blank = RegressionImageDataGenerator()
 
