@@ -72,17 +72,17 @@ def prepare_model_nvidia(input_shape=(80,80,3)):
     model.add(Conv2D(64, 3, 3, subsample=(1, 1), border_mode="valid"))
     model.add(ELU())
     model.add(Flatten())
-    model.add(Dense(1152))
-    model.add(Dropout(.2))
+    model.add(Dense(1164))
+    model.add(Dropout(.5))
     model.add(ELU())
     model.add(Dense(100))
-    model.add(Dropout(.2))
+    model.add(Dropout(.5))
     model.add(ELU())
     model.add(Dense(50))
-    model.add(Dropout(.2))
+    model.add(Dropout(.5))
     model.add(ELU())
     model.add(Dense(10))
-    model.add(Dropout(.2))
+    model.add(Dropout(.5))
     model.add(ELU())
     model.add(Dense(1,activation='tanh'))
 
@@ -120,7 +120,7 @@ def train(model, train_generator,validation_generator):
 
     return model.fit_generator(
         train_generator,
-        samples_per_epoch=train_generator.N*2,
+        samples_per_epoch=train_generator.N*4,
         nb_epoch=10, # it will auto stop
         verbose=1,
         validation_data=validation_generator,
@@ -182,9 +182,10 @@ if __name__ == '__main__':
         metrics=['accuracy'])
 
     log_paths = [
-        ("./data/track1/driving_log.csv","./data/IMG/"),
-        ("./data/track2/driving_log.csv","./data/IMG/"),
-        ("./data/track2-b/driving_log.csv","./data/IMG/")]
+     	("./data/track1-recovery/driving_log.csv","./data/track1-recovery/IMG/"),
+	("./data/track1/driving_log.csv","./data/track1/IMG/"),
+        ("./data/track2/driving_log.csv","./data/track2/IMG/"),
+        ("./data/track2-b/driving_log.csv","./data/track2-b/IMG/")]
 
     #log_paths = ["./data/track2/driving_log.csv"]
     #img_path = "./data/IMG/"
@@ -210,15 +211,16 @@ if __name__ == '__main__':
 
         steer = np.asarray(data['steering_angle'])
 
+
         tmp_images = []
         tmp_angles = []
 
         for index, angle in enumerate(steer):
             tmp_images.append(img_path + os.path.basename(center_imgs[index]))
             tmp_angles.append(angle)
-            #tmp_images.append(left_imgs[index])
+            #tmp_images.append(img_path + os.path.basename(left_imgs[index]))
             #tmp_angles.append(angle-0.2)
-            #tmp_images.append(right_imgs[index])
+            #tmp_images.append(img_path + os.path.basename(right_imgs[index]))
             #tmp_angles.append(angle+0.2)
             #if (index > 500):
             #    break
@@ -231,7 +233,6 @@ if __name__ == '__main__':
         #tmp_pangles = utils.smooth_data(tmp_angles,window=5)
         images += tmp_images
         angles += tmp_angles
-
     images = np.asarray(images)
     angles = np.asarray(angles,dtype=np.float64)
 
