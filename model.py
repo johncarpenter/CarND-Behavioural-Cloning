@@ -120,7 +120,7 @@ def train(model, train_generator,validation_generator):
 
     return model.fit_generator(
         train_generator,
-        samples_per_epoch=train_generator.N*4,
+        samples_per_epoch=train_generator.N,
         nb_epoch=10, # it will auto stop
         verbose=1,
         validation_data=validation_generator,
@@ -178,15 +178,15 @@ if __name__ == '__main__':
     save(model,'model')
 
     model.compile(loss='mse',
-        optimizer=Adam(lr=0.00001),
+        optimizer=Adam(lr=0.0001),
         metrics=['accuracy'])
 
     log_paths = [
-     	("./data/track1-recovery/driving_log.csv","./data/track1-recovery/IMG/"),
-	("./data/track1/driving_log.csv","./data/track1/IMG/"),
-        ("./data/track2/driving_log.csv","./data/track2/IMG/"),
-        ("./data/track2-b/driving_log.csv","./data/track2-b/IMG/")]
-
+     	#("./data/track1-recovery/driving_log.csv","./data/track1-recovery/IMG/")]
+	    #("./data/track1/driving_log.csv","./data/track1/IMG/"),
+        #("./data/track2/driving_log.csv","./data/track2/IMG/"),
+        #("./data/track2-b/driving_log.csv","./data/track2-b/IMG/")]
+        ("./data/track2-recovery/driving_log.csv","./data/track2-recovery/IMG/")]
     #log_paths = ["./data/track2/driving_log.csv"]
     #img_path = "./data/IMG/"
     image_resize = (80,80)
@@ -222,8 +222,6 @@ if __name__ == '__main__':
             #tmp_angles.append(angle-0.2)
             #tmp_images.append(img_path + os.path.basename(right_imgs[index]))
             #tmp_angles.append(angle+0.2)
-            #if (index > 500):
-            #    break
 
 
         #file = img_path + os.path.basename(images[0])
