@@ -73,16 +73,16 @@ def prepare_model_nvidia(input_shape=(80,80,3)):
     model.add(ELU())
     model.add(Flatten())
     model.add(Dense(1164))
-    model.add(Dropout(.5))
+    model.add(Dropout(.2))
     model.add(ELU())
     model.add(Dense(100))
-    model.add(Dropout(.5))
+    model.add(Dropout(.2))
     model.add(ELU())
     model.add(Dense(50))
-    model.add(Dropout(.5))
+    model.add(Dropout(.2))
     model.add(ELU())
     model.add(Dense(10))
-    model.add(Dropout(.5))
+    model.add(Dropout(.2))
     model.add(ELU())
     model.add(Dense(1,activation='tanh'))
 
@@ -182,8 +182,8 @@ if __name__ == '__main__':
         metrics=['accuracy'])
 
     log_paths = [
-     	#("./data/track1-recovery/driving_log.csv","./data/track1-recovery/IMG/")]
-	    #("./data/track1/driving_log.csv","./data/track1/IMG/"),
+     	("./data/track1-recovery/driving_log.csv","./data/track1-recovery/IMG/"),
+	    #("./data/track1/driving_log.csv","./data/track1/IMG/")]
         #("./data/track2/driving_log.csv","./data/track2/IMG/"),
         #("./data/track2-b/driving_log.csv","./data/track2-b/IMG/")]
         ("./data/track2-recovery/driving_log.csv","./data/track2-recovery/IMG/")]

@@ -1,6 +1,7 @@
 import argparse
 import base64
 import json
+import csv
 
 import numpy as np
 import socketio
@@ -21,13 +22,12 @@ tf.python.control_flow_ops = tf
 
 import utils
 
-
 sio = socketio.Server()
 app = Flask(__name__)
 model = None
 prev_image_array = None
+writer = None
 
-steering_angles = [0] * 5
 
 @sio.on('telemetry')
 def telemetry(sid, data):
@@ -47,23 +47,19 @@ def telemetry(sid, data):
     # This model currently assumes that the features of the model are just the images. Feel free to change this.
     new_steering_angle = float(model.predict(transformed_image_array, batch_size=1))
 
-
-    #steering_angles.append(new_steering_angle)
-    #del steering_angles[0]
-
-    #new_steering_angle = sum(steering_angles)/len(steering_angles)
+    #new_steering_angle = 0.20*(float(steering_angle)/100) + 0.80*(new_steering_angle)
 
     # The driving model currently just outputs a constant throttle. Feel free to edit this.
-    throttle = 0.3 if float(speed) < 20 else 0
+    #throttle = 0.4 if abs(float(new_steering_angle)) < 0.05 else 0.2
+    throttle = 0.4 if abs(float(speed)) < 20 else 0.0
     print( new_steering_angle, throttle, speed)
     send_control(new_steering_angle, throttle)
-
+    #write_data(new_steering_angle, throttle, speed)
 
 @sio.on('connect')
 def connect(sid, environ):
     print("connect ", sid)
     send_control(0, 0)
-
 
 def send_control(steering_angle, throttle):
     sio.emit("steer", data={
@@ -71,6 +67,8 @@ def send_control(steering_angle, throttle):
     'throttle': throttle.__str__()
     }, skip_sid=True)
 
+def write_data(steering_angle, throttle, speed):
+    writer.writerow([steering_angle, throttle, speed])
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Remote Driving')
@@ -87,9 +85,14 @@ if __name__ == '__main__':
         model = model_from_json(jfile.read())
 
 
+
     model.compile("adam", "mse")
     weights_file = args.model.replace('json', 'h5')
     model.load_weights(weights_file)
+
+
+    writer = csv.writer(open(args.model.replace('json', 'csv'), 'w'))
+
 
     # wrap Flask application with engineio's middleware
     app = socketio.Middleware(sio, app)
