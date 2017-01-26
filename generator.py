@@ -1,3 +1,8 @@
+'''
+Credit to https://github.com/pkern90/behavioral-cloning/blob/master/utils.py
+No license provided
+'''
+
 import scipy.misc as spm
 from keras.preprocessing.image import *
 

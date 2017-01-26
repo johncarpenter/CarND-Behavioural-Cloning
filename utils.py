@@ -10,13 +10,6 @@ from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_a
 
 from generator import RegressionImageDataGenerator
 
-datagen = RegressionImageDataGenerator(
-    channel_shift_range=0.2,
-    width_shift_range=0.2,
-    width_shift_value_transform=lambda val, shift: val - shift,
-    horizontal_flip=True,
-    horizontal_flip_value_transform=lambda val: -val)
-
 datagen_blank = RegressionImageDataGenerator()
 
 def read_drive_log(path="./data/driving_log.csv"):
@@ -32,8 +25,8 @@ def smooth_data(angles, window=10):
     return list(pangles[0])
 
 
-def steering_angle_generator(filenames, values, target_size=(80,80)):
-    return datagen_blank.flow(load_images(filenames,target_size=target_size),values)
+def steering_angle_generator(filenames, values, target_size=(80,80), image_generator = datagen_blank):
+    return image_generator.flow(load_images(filenames,target_size=target_size),values)
 
 
 def load_images(paths, target_size):

@@ -1,11 +1,11 @@
 
 import os
+import sys
 import threading
 import h5py
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
 
 import random
 import json
@@ -27,10 +27,20 @@ from keras.callbacks import EarlyStopping, ModelCheckpoint
 from sklearn.utils import shuffle
 
 import utils
+from generator import RegressionImageDataGenerator
+
+datagen = RegressionImageDataGenerator(
+    channel_shift_range=0.2,
+    width_shift_range=0.2,
+    width_shift_value_transform=lambda val, shift: val - shift,
+    horizontal_flip=True,
+    horizontal_flip_value_transform=lambda val: -val)
 
 
 def prepare_model_vgg16(input_shape=(224,224,3)):
-    """Pretrained VGG16 model with fine-tunable last two layers
+    """
+    Pretrained VGG16 model with fine-tunable last two layers
+    Wasn't used in testing
     """
     input_image = Input(shape = (224,224,3))
 
@@ -53,6 +63,7 @@ def prepare_model_vgg16(input_shape=(224,224,3)):
 
     model = Model( input=input_image, output=x)
     return model
+
 """
 Model based on Nvidia paper https://arxiv.org/pdf/1604.07316v1.pdf
 Images resized to 80,80 instead of 60,200
@@ -88,6 +99,9 @@ def prepare_model_nvidia(input_shape=(80,80,3)):
 
     return model
 
+'''
+Simple evaluation model. Wasn't sufficient to model this data set accuractely
+'''
 def prepare_model(input_shape=(80,80,3)):
     model = Sequential()
     model.add(Lambda(lambda x: x/127.5 - 1.,input_shape=input_shape))
@@ -112,15 +126,15 @@ def prepare_model(input_shape=(80,80,3)):
 
 
 
-def train(model, train_generator,validation_generator):
-    print("Training")
+def train(model, train_generator,validation_generator, additional_samples = 1):
+    print("Training-------------------------")
     checkpoint = ModelCheckpoint('model.h5', monitor='val_loss', verbose=1, save_best_only=True,
                                  save_weights_only=False, mode='auto')
     early_stopping = EarlyStopping(monitor='val_loss', patience=3, verbose=1, mode='auto')
 
     return model.fit_generator(
         train_generator,
-        samples_per_epoch=train_generator.N,
+        samples_per_epoch=train_generator.N * additional_samples,
         nb_epoch=10, # it will auto stop
         verbose=1,
         validation_data=validation_generator,
@@ -141,10 +155,8 @@ def save(model, prefix):
     """save model for future inspection and continuous training
     """
     model_file = prefix + ".json"
-#    weight_file = prefix + ".h5"
     with open(model_file, 'w') as fp:
         fp.write(model.to_json())
-#    model.save_weights(weight_file)
 
 def render_results(history):
     # summarize history for loss
@@ -159,12 +171,19 @@ def render_results(history):
 
 
 if __name__ == '__main__':
+    #redirect logs to file
+    old_stdout = sys.stdout
+
+    log_file = open("processing.log","w")
+
+    sys.stdout = log_file
+
     # import model and wieghts if exists
     try:
         with open('model.json', 'r') as jfile:
             model = model_from_json(jfile.read())
                 # import weights
-        model.load_weights('model.h5')
+        model.load_weights('umodel.h5')
 
         print("Imported model and weights")
 
@@ -175,31 +194,29 @@ if __name__ == '__main__':
 
     model.summary()
 
-    save(model,'model')
+    save(model,'umodel')
 
     model.compile(loss='mse',
         optimizer=Adam(lr=0.0001),
         metrics=['accuracy'])
 
     log_paths = [
-     	("./data/track1-recovery/driving_log.csv","./data/track1-recovery/IMG/"),
-	    #("./data/track1/driving_log.csv","./data/track1/IMG/")]
+        ("./data/track1-recovery/driving_log.csv","./data/track1-recovery/IMG/")]
+        #("./data/track1-recovery/driving_log.csv","./data/track1-recovery/IMG/"),
+	    #("./data/track1/driving_log.csv","./data/track1/IMG/"),
         #("./data/track2/driving_log.csv","./data/track2/IMG/"),
-        #("./data/track2-b/driving_log.csv","./data/track2-b/IMG/")]
-        ("./data/track2-recovery/driving_log.csv","./data/track2-recovery/IMG/")]
-    #log_paths = ["./data/track2/driving_log.csv"]
-    #img_path = "./data/IMG/"
+        #("./data/track2-b/driving_log.csv","./data/track2-b/IMG/"),
+        #("./data/track2-recovery/driving_log.csv","./data/track2-recovery/IMG/")]
+
     image_resize = (80,80)
 
     images = []
     angles = []
 
-
     for path in log_paths:
 
         log_path = path[0]
         img_path = path[1]
-
 
         data = utils.read_drive_log(path=log_path)
         n_samples = data.shape[0]
@@ -210,7 +227,6 @@ if __name__ == '__main__':
         right_imgs = np.asarray(data['right'])
 
         steer = np.asarray(data['steering_angle'])
-
 
         tmp_images = []
         tmp_angles = []
@@ -223,12 +239,9 @@ if __name__ == '__main__':
             #tmp_images.append(img_path + os.path.basename(right_imgs[index]))
             #tmp_angles.append(angle+0.2)
 
-
-        #file = img_path + os.path.basename(images[0])
-        #plt.imshow(utils.load_img_from_file(file,target_size=(80,80)))
-        #plt.show()
-
+        # Smoothing data didn't increase accuracy but left here as a reference
         #tmp_pangles = utils.smooth_data(tmp_angles,window=5)
+
         images += tmp_images
         angles += tmp_angles
     images = np.asarray(images)
@@ -236,13 +249,11 @@ if __name__ == '__main__':
 
     print("Processing {} Records.".format(angles.shape[0]))
 
-
     images,  angles = shuffle(images, angles, random_state=0)
 
     X_train,test_images,y_train,test_angles = train_test_split(images,angles,test_size=0.15)
 
     X_validation,X_test,y_validation,y_test = train_test_split(test_images,test_angles,test_size=0.25)
-
 
     print("Number of Training Images:",X_train.shape[0])
     print("Number of Training Steering Angles:",y_train.shape[0])
@@ -252,11 +263,16 @@ if __name__ == '__main__':
     print("Number of Test Images:",X_test.shape[0])
     print("Number of Test Steering Angles:",y_test.shape[0])
 
-    train_generator = utils.steering_angle_generator(X_train,y_train,target_size=image_resize)
+    train_generator = utils.steering_angle_generator(X_train,y_train,target_size=image_resize,image_generator=datagen)
     val_generator = utils.steering_angle_generator(X_validation,y_validation,target_size=image_resize)
     test_generator = utils.steering_angle_generator(X_test,y_test,target_size=image_resize)
 
-    history = train(model, train_generator , val_generator)
+    history = train(model, train_generator , val_generator, additional_samples=2)
     #render_results(history)
 
     evaluate(model,test_generator)
+
+    # Close the log file
+    sys.stdout = old_stdout
+
+    log_file.close()

@@ -47,11 +47,15 @@ def telemetry(sid, data):
     # This model currently assumes that the features of the model are just the images. Feel free to change this.
     new_steering_angle = float(model.predict(transformed_image_array, batch_size=1))
 
+    # Simple filter. Makes the output better but obsures the results from the model. 
     #new_steering_angle = 0.20*(float(steering_angle)/100) + 0.80*(new_steering_angle)
 
-    # The driving model currently just outputs a constant throttle. Feel free to edit this.
+    # Testing slow down when the angle is higher, this limits oscillations and errors
     #throttle = 0.4 if abs(float(new_steering_angle)) < 0.05 else 0.2
-    throttle = 0.4 if abs(float(speed)) < 20 else 0.0
+
+    # Hardware limitations on the emulator machine force me to limit the speed since
+    # it increases the FPS for the testing
+    throttle = 0.4 if abs(float(speed)) < 15 else 0.0
     print( new_steering_angle, throttle, speed)
     send_control(new_steering_angle, throttle)
     #write_data(new_steering_angle, throttle, speed)
@@ -84,15 +88,9 @@ if __name__ == '__main__':
         # instead.
         model = model_from_json(jfile.read())
 
-
-
     model.compile("adam", "mse")
     weights_file = args.model.replace('json', 'h5')
     model.load_weights(weights_file)
-
-
-    writer = csv.writer(open(args.model.replace('json', 'csv'), 'w'))
-
 
     # wrap Flask application with engineio's middleware
     app = socketio.Middleware(sio, app)
