@@ -1,14 +1,13 @@
-Behavioral Cloning
+#Behavioral Cloning
 ====================
 
-
-** Udacity Self-Driving Car Project #3 **
+##Udacity Self-Driving Car Project #3
 
 This project is a demonstration of deep-learning applied to simulated car navigation. For this project we used a driving simulator to gather steering angles and images from a front-facing camera. Running a deep-learning algorithm on the images we attempted to generated the corresponding steering angle to apply to the simulator.
 
-*** Note: This project requires the Udacity driving simulator. This simulator is not yet publicly available. ***
+***Note: This project requires the Udacity driving simulator. This simulator is not yet publicly available.***
 
-** Getting Started Running the Simulation **
+**Getting Started Running the Simulation**
 
 1. Clone the project
 
