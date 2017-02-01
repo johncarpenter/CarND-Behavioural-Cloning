@@ -91,7 +91,7 @@ There was a number of experiments with different augmentations. Namely using the
 
 Generally the best results were achieved with 2-3 * num samples for augmentation
 
-Sample Image
+Sample Image (BGR)
 
 ![sample image](http://i.imgur.com/bfADnS0.png)
 
