@@ -7,13 +7,18 @@ This project is a demonstration of deep-learning applied to simulated car naviga
 ***Note: This project requires the Udacity driving simulator. This simulator is not yet publicly available.***
 
 ####Walkthough
+
+*Demo Video*
+
 [![Video of Performance](http://img.youtube.com/vi/MlIZx79stNk/0.jpg)](http://www.youtube.com/watch?v=MlIZx79stNk)
 
 *Track1*
+
 ![GIF of Track1](http://i.giphy.com/5OddbSOQo0Rry.gif)
 
 *Track2*
-![GIF of Track2](https://media.giphy.com/media/13OeeFhKNvvUKA/giphy.gif)
+
+![GIF of Track2](http://i.giphy.com/cktuObHgXo2nS.gif)
 
 
 
@@ -46,7 +51,7 @@ There are two model files included in the project directory ```model.json``` and
 python drive.py [model].json
 ```
 
-and execute the simulator. ***Note: The model requires a fairly high frame rate and good or better quality graphics output. Without that the performance drops significantly ***
+and execute the simulator. ***Note: The model requires a fairly high frame rate and good or better quality graphics output. Without that the performance drops significantly***
 
 ####Building a weights model
 
@@ -65,6 +70,39 @@ python model.py
 
 ### Architecture of Deep Learning module
 
-The model chosen for this analysis was based upon a research report produced by [NVIDIA] (https://arxiv.org/pdf/1604.07316v1.pdf). The
+The model chosen for this analysis was based upon a research report produced by [NVIDIA] (https://arxiv.org/pdf/1604.07316v1.pdf). Other models include pretrained VGG16 and another custom model, they are included in the code for reference purposed only.
 
 ![ConvNet Diagram](https://i.imgur.com/dgmlseC.png)
+
+The model performed well enough in practice and was able to complete the simulation with a moderately sized dataset.
+
+*Preprocessing*
+
+Preprocessing the images proved to be very effective at speeding up the training and arriving at a better result. The following steps were taken for preprocessing the images. In order;
+
+1. *Crop* The top 54 pixels were cropped out of the image. They didn't contain any road geometry so they were not required
+2. *Resize* The images were resized to 80x80. This was chosen after discussion with other class members based upon their results. Smaller images were also easier to manage
+3. *Augment* During the training images were augmented with additional samples;
+  a. ***channel shift*** Color range was shifted slightly to handle different lighting conditions
+  b. ***width shift*** Images were shifted in width to help center the car on the track
+  c. ***flip image*** Flipping the steering angle and image was very effective at supplementing all the data
+
+There was a number of experiments with different augmentations. Namely using the left and right images and some smoothing of the steering angle output data sets. In both cases the augmentations didn't seem to improve the accuracy of the model and often caused some issues with noisy data.
+
+Generally the best results were achieved with 2-3 * num samples for augmentation
+
+Sample Image
+
+![sample image](http://i.imgur.com/bfADnS0.png)
+
+*Training*
+
+The training algorithm used a simple Mean-Squared Error algorithm with the Adam(loss=0.0001) function. There wasn't much experimentation on the algorithms as the results converged fairly well in practice.
+
+A checkpoint function and a early stopping algorithms were added into the code. The checkpoint function ensured that only the best weights were saved from the training set, and were updated only when there was an improvement. The early stopping algorithm monitored the loss function and if there didn't seem to be an improvement would halt the iterations. This should prevent overfitting of the data
+
+The data was split into training, validation and testing sets prior to any augmentation. Only the training set was augmented. 15% of the data was reserved for validation and of that set, 25% was reserved for testing.
+
+*iterations*
+
+The code is designed to incrementally add additional training sets. By re-running the ```model.py``` with an existing ```model.json``` and ```model.h5``` files will build upon those existing training sets.

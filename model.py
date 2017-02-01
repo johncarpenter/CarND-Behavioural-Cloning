@@ -183,7 +183,7 @@ if __name__ == '__main__':
         with open('model.json', 'r') as jfile:
             model = model_from_json(jfile.read())
                 # import weights
-        model.load_weights('umodel.h5')
+        model.load_weights('model.h5')
 
         print("Imported model and weights")
 
@@ -242,8 +242,16 @@ if __name__ == '__main__':
         # Smoothing data didn't increase accuracy but left here as a reference
         #tmp_pangles = utils.smooth_data(tmp_angles,window=5)
 
+
+
         images += tmp_images
         angles += tmp_angles
+
+
+    #file = img_path + os.path.basename(images[0])
+    #plt.imshow(utils.load_img_from_file(file,target_size=(80,80)))
+    #plt.show()
+
     images = np.asarray(images)
     angles = np.asarray(angles,dtype=np.float64)
 
