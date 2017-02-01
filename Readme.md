@@ -6,6 +6,17 @@ This project is a demonstration of deep-learning applied to simulated car naviga
 
 ***Note: This project requires the Udacity driving simulator. This simulator is not yet publicly available.***
 
+**Walkthough
+[![Video of Performance](http://img.youtube.com/vi/MlIZx79stNk/0.jpg)](http://www.youtube.com/watch?v=MlIZx79stNk)
+
+**Track1
+![GIF of Track1](https://media.giphy.com/media/6cB03Pjt5ldv2/giphy.gif)
+
+**Track2
+![GIF of Track2](https://media.giphy.com/media/13OeeFhKNvvUKA/giphy.gif)
+
+
+
 ####Getting Started Running the Simulation
 
 1. Clone the project
