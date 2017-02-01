@@ -48,7 +48,11 @@ This project is a demonstration of deep-learning applied to simulated car naviga
 There are two model files included in the project directory ```model.json``` and ```udacity-model.json```. The program will search for the ```.h5``` weights file that is named according to the model.
 
 ```python
-python drive.py [model].json
+python drive.py model.json
+
+or
+
+python drive.py udacity-model.json
 ```
 
 and execute the simulator. ***Note: The model requires a fairly high frame rate and good or better quality graphics output. Without that the performance drops significantly***
