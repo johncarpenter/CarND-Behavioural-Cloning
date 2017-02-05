@@ -21,8 +21,10 @@ from keras.layers import Input, Lambda
 from keras.layers import Dropout, BatchNormalization, ELU
 from keras.optimizers import Adam
 from keras.regularizers import l2
+from keras.utils.visualize_util import plot
 
-from keras.callbacks import EarlyStopping, ModelCheckpoint
+
+from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard
 
 from sklearn.utils import shuffle
 
@@ -128,9 +130,12 @@ def prepare_model(input_shape=(80,80,3)):
 
 def train(model, train_generator,validation_generator, additional_samples = 1):
     print("Training-------------------------")
-    checkpoint = ModelCheckpoint('model.h5', monitor='val_loss', verbose=1, save_best_only=True,
+    checkpoint = ModelCheckpoint('model2.h5', monitor='val_loss', verbose=1, save_best_only=True,
                                  save_weights_only=False, mode='auto')
     early_stopping = EarlyStopping(monitor='val_loss', patience=3, verbose=1, mode='auto')
+
+    # for visualizing through TensorBoard
+    tensor_board = TensorBoard(log_dir='./logs', histogram_freq=5, write_graph=False, write_images=True)
 
     return model.fit_generator(
         train_generator,
@@ -139,7 +144,7 @@ def train(model, train_generator,validation_generator, additional_samples = 1):
         verbose=1,
         validation_data=validation_generator,
         nb_val_samples=validation_generator.N,
-        callbacks=[checkpoint,early_stopping])
+        callbacks=[checkpoint,early_stopping,tensor_board])
 
 def evaluate(model, test_generator):
     print("Testing--------------------------")
@@ -163,10 +168,11 @@ def render_results(history):
     plt.plot(history.history['loss'])
     plt.plot(history.history['val_loss'])
     plt.title('model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
+    plt.ylabel('Loss')
+    plt.xlabel('Epoch')
     plt.legend(['train', 'test'], loc='upper left')
-    plt.show()
+    plt.savefig("model_train.png")
+    plt.close()
 
 
 
@@ -192,21 +198,22 @@ if __name__ == '__main__':
         print("Contructing new model")
         model = prepare_model_nvidia(input_shape=(80,80,3))
 
+    # Analysis Summary and Output Images
     model.summary()
+    plot(model, to_file='model.png')
 
-    save(model,'umodel')
+    save(model,'model')
 
     model.compile(loss='mse',
         optimizer=Adam(lr=0.0001),
         metrics=['accuracy'])
 
     log_paths = [
-        ("./data/track1-recovery/driving_log.csv","./data/track1-recovery/IMG/")]
-        #("./data/track1-recovery/driving_log.csv","./data/track1-recovery/IMG/"),
-	    #("./data/track1/driving_log.csv","./data/track1/IMG/"),
-        #("./data/track2/driving_log.csv","./data/track2/IMG/"),
-        #("./data/track2-b/driving_log.csv","./data/track2-b/IMG/"),
-        #("./data/track2-recovery/driving_log.csv","./data/track2-recovery/IMG/")]
+        ("./data/track1-recovery/driving_log.csv","./data/track1-recovery/IMG/"),
+	    ("./data/track1/driving_log.csv","./data/track1/IMG/"),
+        ("./data/track2/driving_log.csv","./data/track2/IMG/"),
+        ("./data/track2-b/driving_log.csv","./data/track2-b/IMG/"),
+        ("./data/track2-recovery/driving_log.csv","./data/track2-recovery/IMG/")]
 
     image_resize = (80,80)
 
@@ -232,20 +239,28 @@ if __name__ == '__main__':
         tmp_angles = []
 
         for index, angle in enumerate(steer):
-            tmp_images.append(img_path + os.path.basename(center_imgs[index]))
-            tmp_angles.append(angle)
-            #tmp_images.append(img_path + os.path.basename(left_imgs[index]))
-            #tmp_angles.append(angle-0.2)
-            #tmp_images.append(img_path + os.path.basename(right_imgs[index]))
-            #tmp_angles.append(angle+0.2)
+            if angle != 0 or (angle == 0 and random.random() > 0.8):
+                tmp_images.append(img_path + os.path.basename(center_imgs[index]))
+                tmp_angles.append(angle)
+                #tmp_images.append(img_path + os.path.basename(left_imgs[index]))
+                #tmp_angles.append(angle-0.2)
+                #tmp_images.append(img_path + os.path.basename(right_imgs[index]))
+                #tmp_angles.append(angle+0.2)
 
         # Smoothing data didn't increase accuracy but left here as a reference
         #tmp_pangles = utils.smooth_data(tmp_angles,window=5)
 
-
-
         images += tmp_images
         angles += tmp_angles
+
+
+    # Visualize inputs
+    plt.hist(angles,bins=50)
+    plt.title("Steering Angle Distribution")
+    plt.xlabel("Steering Angle")
+    plt.ylabel("Frequency")
+    plt.savefig("model_dist.png")
+    plt.close()
 
 
     #file = img_path + os.path.basename(images[0])
@@ -276,7 +291,7 @@ if __name__ == '__main__':
     test_generator = utils.steering_angle_generator(X_test,y_test,target_size=image_resize)
 
     history = train(model, train_generator , val_generator, additional_samples=2)
-    #render_results(history)
+    render_results(history)
 
     evaluate(model,test_generator)
 

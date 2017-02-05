@@ -3,3 +3,5 @@ IMG
 *.csv
 .DS_Store
 data
+logs
+processing.log
